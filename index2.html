@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet User Location</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 80vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([51.505, -0.09], 8); // Default view
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            // attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Marker for user's location
+        let userMarker;
+
+        // Function to set map to user's current location initially
+        function setInitialLocation(position) {
+            const { latitude, longitude } = position.coords;
+
+            // Set view to user's current location
+            map.setView([latitude, longitude], 8);
+
+            // Add a marker to the user's location
+            userMarker = L.marker([latitude, longitude]).addTo(map)
+                .bindPopup("You are here").openPopup();
+        }
+
+        // Function to update the marker on user's current location
+        function updateUserLocation(position) {
+            const { latitude, longitude } = position.coords;
+
+            // Update marker position
+            if (userMarker) {
+                userMarker.setLatLng([latitude, longitude]);
+            }
+        }
+
+        // Geolocation options (you can set your own settings)
+        const geoOptions = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        };
+
+        // Get initial location once
+        navigator.geolocation.getCurrentPosition(setInitialLocation, error => {
+            console.error("Error getting location:", error);
+        }, geoOptions);
+
+        // Watch for location changes (this won't update the map's view, only the marker)
+        navigator.geolocation.watchPosition(updateUserLocation, error => {
+            console.error("Error tracking location:", error);
+        }, geoOptions);
+    </script>
+</body>
+</html>
